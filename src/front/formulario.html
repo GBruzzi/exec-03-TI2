@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD de Times de Futebol</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Times de Futebol</h1>
+
+        <form id="teamForm" action="/time" method="POST">
+            <label for="teamName">Nome do Time:</label>
+            <input type="text" id="teamName" name="nome" required>
+
+            <label for="titles">Quantidade de Títulos:</label>
+            <input type="number" id="titles" name="titulos" required>
+
+            <label for="fans">Quantidade de Torcida:</label>
+            <input type="number" id="fans" name="torcida" required>
+
+            <button type="submit">Salvar Time</button>
+        </form>
+
+        <h2>Lista de Times</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Títulos</th>
+                    <th>Torcida</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+    document.getElementById('teamForm').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        const formData = new FormData(this);
+        const data = {
+            nome: formData.get('nome'),
+            titulos: formData.get('titulos'),
+            torcida: formData.get('torcida')
+        };
+
+        fetch('/time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Time adicionado com sucesso!');
+                this.reset(); 
+                loadTeams(); 
+            } else {
+                alert('Erro ao adicionar o time.');
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    });
+
+    function loadTeams() {
+        fetch('/time')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = ''; 
+
+            data.forEach(time => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${time.nome}</td>
+                    <td>${time.titulos}</td>
+                    <td>${time.torcida}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar times:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTeams);
+    </script>
+</body>
+</html>
